@@ -1,0 +1,50 @@
+.post-action-buttons {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+/* image preview styles */
+.image-preview-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.image-preview-title {
+    display: block;
+    padding: 10px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    text-align: center;
+    font-size: 14px;
+    border-bottom: 1px solid #ced4da;
+}
+
+.image-preview {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 0;
+    border-width: 0 0 1px 0 !important;
+    transition: transform cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s;
+}
+
+.image-preview:hover {
+    transform: scale(0.95);
+}
+
+.image-preview-container input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border-radius: 0;
+    border-width: 1px 0 0 0 !important;
+}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Comments;
 use App\Models\Posts;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -54,12 +55,12 @@ class PostsController extends Controller
      * @param string $slug
      * @return \Illuminate\View\View
      */
-    public function show(Posts $post): \Illuminate\View\View
+    public function show(string $slug): \Illuminate\View\View
     {
-        $post = $post;
+        $post = Posts::where('slug', $slug)->firstOrFail();
 
-        $previous_post = Posts::where('id', '<', $post->id)->latest()->first();
-        $next_post = Posts::where('id', '>', $post->id)->oldest()->first();
+        $previous_post = $post->where('id', '<', $post->id)->without(['author', 'category'])->latest()->first();
+        $next_post = $post->where('id', '>', $post->id)->without(['author', 'category'])->first();
 
         $resources = [
             'title' => $post->title,
@@ -69,13 +70,19 @@ class PostsController extends Controller
                 'Posts' => '/posts',
                 $post->title => '/posts/' . $post->slug,
             ],
+            'javascript' => [
+                [
+                    'src' => 'post.js',
+                    'base_path' => '/js/'
+                ]
+            ]
         ];
 
         return view('post')->with([
             ...$resources,
             'post' => $post,
-            'previous_post' => $previous_post,
-            'next_post' => $next_post
+            'previous_post' => $previous_post ?: null,
+            'next_post' => $next_post ?: null
         ]);
     }
 }

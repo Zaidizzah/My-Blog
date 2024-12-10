@@ -30,21 +30,21 @@ class PostController extends Controller
             'css' => [
                 [
                     'href' => 'styles.css',
-                    'base_path' => 'resources/post/css/'
+                    'base_path' => '/resources/post/css/'
                 ]
             ],
             'javascript' => [
                 [
                     'src' => 'tinymce.min.js',
-                    'base_path' => 'resources/plugins/tinymce/'
+                    'base_path' => '/resources/plugins/tinymce/'
                 ],
                 [
                     'src' => 'uploadpreview.js',
-                    'base_path' => 'resources/plugins/uploadpreview/'
+                    'base_path' => '/resources/plugins/uploadpreview/'
                 ],
                 [
                     'src' => 'scripts.js',
-                    'base_path' => 'resources/post/js/'
+                    'base_path' => '/resources/post/js/'
                 ]
             ]
         ];
@@ -179,10 +179,9 @@ class PostController extends Controller
      */
     public function get()
     {
-        $id = request('id');
         $post = Posts::without(['category', 'author'])
             ->select('id', 'user_id', 'category_id', 'title', 'slug', 'image', 'body')
-            ->where('user_id', Auth::user()->id)->find($id);
+            ->where('user_id', Auth::user()->id)->find(request('id'));
 
         if (empty($post)) {
             return response()->json([

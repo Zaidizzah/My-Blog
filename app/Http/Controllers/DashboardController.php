@@ -26,17 +26,17 @@ class DashboardController extends Controller
             'css' => [
                 [
                     'href' => 'styles.css',
-                    'base_path' => 'resources/dashboard/css/'
+                    'base_path' => '/resources/dashboard/css/'
                 ]
             ],
             'javascript' => [
                 [
                     'src' => 'echarts.min.js',
-                    'base_path' => 'resources/plugins/echarts/'
+                    'base_path' => '/resources/plugins/echarts/'
                 ],
                 [
                     'src' => 'scripts.js',
-                    'base_path' => 'resources/dashboard/js/'
+                    'base_path' => '/resources/dashboard/js/'
                 ]
             ]
         ];

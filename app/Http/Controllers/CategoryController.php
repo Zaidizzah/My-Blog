@@ -26,7 +26,7 @@ class CategoryController extends Controller
             'javascript' => [
                 [
                     'src' => 'scripts.js',
-                    'base_path' => 'resources/category/js/'
+                    'base_path' => '/resources/category/js/'
                 ]
             ]
         ];

@@ -23,7 +23,7 @@ class AuthController extends Controller
             'css' => [
                 [
                     'href' => 'signin.css',
-                    'base_path' => 'css/'
+                    'base_path' => '/css/'
                 ]
             ]
         ];
@@ -63,7 +63,7 @@ class AuthController extends Controller
             'css' => [
                 [
                     'href' => 'signup.css',
-                    'base_path' => 'css/'
+                    'base_path' => '/css/'
                 ]
             ]
         ];

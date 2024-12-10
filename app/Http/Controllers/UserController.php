@@ -29,13 +29,13 @@ class UserController extends Controller
             'css' => [
                 [
                     'href' => 'styles.css',
-                    'base_path' => 'resources/user/css/'
+                    'base_path' => '/resources/user/css/'
                 ]
             ],
             'javascript' => [
                 [
                     'src' => 'scripts.js',
-                    'base_path' => 'resources/user/js/'
+                    'base_path' => '/resources/user/js/'
 
                 ]
             ]

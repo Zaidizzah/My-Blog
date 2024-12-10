@@ -19,7 +19,7 @@ class Posts extends Model
         'body',
         'image'
     );
-    protected $with = ['category', 'author'];
+    protected $with = ['category', 'author', 'comments'];
 
     public function category()
     {
@@ -29,6 +29,11 @@ class Posts extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comments::class, 'post_id');
     }
 
     /**

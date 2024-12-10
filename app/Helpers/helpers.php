@@ -19,7 +19,7 @@ if (!function_exists('highlight')) {
     }
 }
 
-if (!function_exists('routeCheck')) {
+if (!function_exists('route_check')) {
 
     /** 
      * Check if route is active
@@ -33,7 +33,7 @@ if (!function_exists('routeCheck')) {
     }
 }
 
-if (!function_exists('setActive')) {
+if (!function_exists('set_active')) {
 
     /**
      * Set active class for current route
@@ -47,7 +47,7 @@ if (!function_exists('setActive')) {
     }
 }
 
-if (!function_exists('isActiveQuery')) {
+if (!function_exists('is_active_query')) {
 
     /**
      * Set active class for current route
@@ -61,7 +61,7 @@ if (!function_exists('isActiveQuery')) {
     }
 }
 
-if (!function_exists('breadcrumbBuilder')) {
+if (!function_exists('breadcrumb_builder')) {
 
     /**
      * Generate breadcrumb
@@ -125,7 +125,7 @@ if (!function_exists('toast')) {
     }
 }
 
-if (!function_exists('generateTags')) {
+if (!function_exists('generate_tags')) {
 
     /**
      * Generate HTML tags for scripts or links based on the provided configuration.
@@ -276,7 +276,94 @@ if (!function_exists('generateTags')) {
     }
 }
 
-if (!function_exists('generateMonthName')) {
+if (!function_exists('generate_comments_section') && !function_exists('render_root_comment')) {
+
+    /**
+     * Generate comments section.
+     *
+     * @param \Illuminate\Support\Collection $comments
+     * @return string
+     */
+    function generate_comments_section(object $comments)
+    {
+        if ($comments->isEmpty()) {
+            return '<div class="no-comments text-center py-4">No comments yet.</div>';
+        }
+
+        // Group comments by parent_id
+        $commentGroups = $comments->groupBy('parent_id');
+
+        // Generate HTML untuk root comments
+        $rootComments = $commentGroups->get(null, collect());
+        $commentsHtml = '';
+        foreach ($rootComments as $comment) {
+            $commentsHtml .= render_comment_with_replies($comment, $commentGroups);
+        }
+
+        return '<div class="comments-section">' . $commentsHtml . '</div>';
+    }
+
+    /**
+     * Render a single comment with its replies recursively.
+     *
+     * @param object $comment
+     * @param \Illuminate\Support\Collection $commentGroups
+     * @return string
+     */
+    function render_comment_with_replies($comment, $commentGroups, $parentComment = null)
+    {
+        $authorName = $comment->author->name;
+        $postId = $comment->post_id ?? null;
+        $avatarUrl = $comment->author->image ?? "https://dummyimage.com/680x480/3e3e3e/fff&text={$authorName}";
+        $timeAgo = $comment->created_at->diffForHumans();
+
+        // Optimized "Reply to"
+        $replyingTo = $parentComment
+            ? "<span class=\"replyng-to text-primary\">@{$parentComment->author->name}</span>"
+            : '';
+
+        // Render komentar utama
+        $html = <<<HTML
+            <div class="comments-wrapper">
+                <div class="comment" data-post-id="{$postId}" data-comment-id="{$comment->id}" data-comment-writter="{$comment->author->name}" title="Comment by {$authorName}">
+                    <img class="comment-avatar img-thumbnail" 
+                        src="{$avatarUrl}" 
+                        title="User Avatar: {$authorName}" 
+                        data-img-preview
+                        data-img-preview-title="User Avatar: {$authorName}"
+                        loading="lazy" 
+                        onerror="this.onerror=null;this.src='/images/no-image-available.jpg';"
+                        alt="User Avatar">
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">{$authorName} {$replyingTo} . 
+                                <a href="javascript:void(0);" 
+                                class="comment-reply small no-permalink" 
+                                title="Reply to this comment">Reply</a>
+                            </span>
+                            <span class="comment-date">{$timeAgo}</span>
+                        </div>
+                        <p class="comment-text">{$comment->description}</p>
+                    </div>
+                </div>
+            HTML;
+
+        // Cek jika ada nested comments
+        $nestedComments = $commentGroups->get($comment->id, collect());
+        if ($nestedComments->isNotEmpty()) {
+            $html .= '<div class="nested-comments">';
+            foreach ($nestedComments as $nestedComment) {
+                $html .= render_comment_with_replies($nestedComment, $commentGroups, $comment);
+            }
+            $html .= '</div>';
+        }
+
+        $html .= '</div>'; // Tutup wrapper utama
+        return $html;
+    }
+}
+
+if (!function_exists('generate_month_name')) {
 
     /**
      * Generate month name.
@@ -284,7 +371,6 @@ if (!function_exists('generateMonthName')) {
      * @param string|int $month
      * @return string
      */
-
     function generate_month_name(string|int $month)
     {
         if (empty($month)) {

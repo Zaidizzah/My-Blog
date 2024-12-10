@@ -38,7 +38,48 @@
         </article>
     </section>
 
+    <section class="comments-container" id="comments" aria-label="comments section" title="Comments section for post '{{ $post->title }}'">
+        <h2 class="h2 text-dark mb-3" id="comments">Comments</h2>
+
+        @include('partials.comments', [
+            'comments' => $post->comments
+        ])
+    </section>
+
+    <section class="post-prev-next-section bg-light border border-2 border-dark p-2 mb-3" aria-label="post prev next section">
+        <div class="d-flex align-items-center justify-content-between gap-1" title="Previous Post: {{ $previous_post ? $previous_post->title : 'No Previous Post' }} | Next Post: {{ $next_post ? $next_post->title : 'No Next Post' }}">
+            <a href="{{ $previous_post ? '/posts/' . $previous_post->slug : 'javascript:void(0);' }}" class="no-permalink post-prev-next-link{{ $previous_post ? '' : ' text-muted' }}" title="Link: redirect to previous post '{{ $previous_post ? $previous_post->title : 'No Previous Post' }}">
+                @if($previous_post)
+                    <img src="{{ $previous_post->image ? asset('storage/images/posts/' . $previous_post->image) : '/images/no-image-available.jpg' }}" 
+                        class="img-thumbnail border-dark rounded-0" 
+                        width="40px" height="40px"
+                        alt="Thumbnail: {{ $previous_post->title }}" 
+                        loading="lazy" 
+                        data-img-preview
+                        data-img-preview-title="Thumbnail: {{ $previous_post->title }}"
+                        onerror="this.onerror=null;this.src='/images/no-image-available.jpg';">
+                @endif
+                <span class="post-prev-next-title ms-1">
+                    {{ $previous_post ? $previous_post->title : 'No Previous Post' }}
+                </span>
+            </a>
+            <a href="{{ $next_post ? '/posts/' . $next_post->slug : 'javascript:void(0);' }}" class="no-permalink post-prev-next-link{{ $next_post ? '' : ' text-muted' }}" title="Link: redirect to next post '{{ $next_post ? $next_post->title : 'No Next Post' }}">
+                <span class="post-prev-next-title me-1">
+                    {{ $next_post ? $next_post->title : 'No Next Post' }}
+                </span>
+                @if ($next_post)
+                    <img src="{{ $next_post->image ? asset('storage/images/posts/' . $next_post->image) : '/images/no-image-available.jpg' }}" 
+                        class="img-thumbnail border-dark rounded-0" 
+                        width="40px" height="40px" 
+                        alt="Thumbnail: {{ $next_post->title }}" 
+                        loading="lazy" 
+                        data-img-preview
+                        data-img-preview-title="Thumbnail: {{ $next_post->title }}"
+                        onerror="this.onerror=null;this.src='/images/no-image-available.jpg';">
+                @endif
+            </a>
+        </div>
+    </section>
+
     <a href="/posts?page=1" class="btn btn-primary border-1 border-dark" title="Link: redirect to blog page"><< Back</a>
-    <a href="{{ $previous_post ? "/posts/{$previous_post->slug}" : '#' }}" class="btn btn-primary border-1 border-dark {{ $previous_post ? '' : 'disabled' }}" title="Link: redirect to previous post">&lt;&lt; Previous Post</a>
-    <a href="{{ $next_post ? "/posts/{$next_post->slug}" : '#' }}" class="btn btn-primary border-1 border-dark {{ $next_post ? '' : 'disabled' }}" title="Link: redirect to next post">Next Post &gt;&gt;</a>
 @endsection

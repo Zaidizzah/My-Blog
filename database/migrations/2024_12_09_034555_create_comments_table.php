@@ -17,6 +17,9 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->integer('parent_id')->nullable();
             $table->text('description');
+            $table->integer('like_count')->default(0);
+            $table->integer('dislike_count')->default(0);
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
     }

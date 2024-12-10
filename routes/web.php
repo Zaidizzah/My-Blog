@@ -7,6 +7,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -314,3 +315,47 @@ Route::get(
         'destroy'
     ]
 )->middleware('auth')->name('post.destroy');
+
+/**
+ * Route to render comments management page with GET method
+ */
+Route::get(
+    '/comment/{post:slug}',
+    [
+        CommentsController::class,
+        'index'
+    ]
+)->middleware('auth')->name('comment');
+
+/**
+ * Route to store comment with POST method
+ */
+Route::post(
+    '/comment/store/{post:slug}',
+    [
+        CommentsController::class,
+        'store'
+    ]
+)->middleware('auth')->name('comment.store');
+
+/**
+ * Route to replying another comment with POST method
+ */
+Route::post(
+    '/comment/reply/{comment:id}',
+    [
+        CommentsController::class,
+        'reply'
+    ]
+)->middleware('auth')->name('comment.reply');
+
+/**
+ * Route to delete comment with GET method
+ */
+Route::get(
+    '/comment/delete/{comment:id}',
+    [
+        CommentsController::class,
+        'destroy'
+    ]
+)->middleware('auth')->name('comment.destroy');

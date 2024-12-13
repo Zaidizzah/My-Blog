@@ -9,6 +9,8 @@ class Comments extends Model
 {
     use HasFactory;
 
+    protected $table = 'comments';
+
     protected $fillable = [
         'post_id',
         'user_id',
@@ -20,11 +22,21 @@ class Comments extends Model
 
     public function post()
     {
-        return $this->belongsTo(Posts::class);
+        return $this->belongsTo(Posts::class, 'post_id', 'id');
     }
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comments::class, 'parent_id', 'id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(Comment_reports::class, 'comment_id', 'id');
     }
 }

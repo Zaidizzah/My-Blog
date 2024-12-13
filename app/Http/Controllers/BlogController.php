@@ -8,7 +8,7 @@ use App\Models\Posts;
 use App\Models\User;
 use Illuminate\Support\Str;
 
-class PostsController extends Controller
+class BlogController extends Controller
 {
     /**
      * Shows all posts.
@@ -32,6 +32,10 @@ class PostsController extends Controller
             $titleParts[] = 'By <small class="text-muted fst-italic">"' . Str::title($author) . '"</small>';
         }
 
+        if (request('month') && request('year')) {
+            $titleParts[] = 'In <small class="text-muted fst-italic">' . generate_month_name(request('month')) . ' ' . request('year') . '</small>';
+        }
+
         $resources = [
             'title' => 'Posts',
             'subtitle' => empty($titleParts) ? 'All Posts' : 'Posts - ' . implode(' ', $titleParts),
@@ -43,7 +47,8 @@ class PostsController extends Controller
 
         return view('posts')->with([
             ...$resources,
-            'posts' => Posts::latest()->filter(request(['search', 'category', 'author']))->paginate(23)->withQueryString(),
+            'posts' => Posts::latest()->filter(request(['search', 'category', 'author', 'month', 'year']))->paginate(21)->withQueryString(),
+            'new_posts' => Posts::latest()->take(7)->get(),
             'authors' => User::select('name')->get(),
             'archives' => Posts::selectRaw('year(created_at) year, month(created_at) month, count(*) published')->groupBy('year', 'month')->orderByRaw('min(created_at) desc')->get()
         ]);
@@ -59,6 +64,9 @@ class PostsController extends Controller
     {
         $post = Posts::where('slug', $slug)->firstOrFail();
 
+        // Set captcha on session
+        session(['captcha' => generate_captcha()]);
+
         $previous_post = $post->where('id', '<', $post->id)->without(['author', 'category'])->latest()->first();
         $next_post = $post->where('id', '>', $post->id)->without(['author', 'category'])->first();
 
@@ -70,10 +78,16 @@ class PostsController extends Controller
                 'Posts' => '/posts',
                 $post->title => '/posts/' . $post->slug,
             ],
+            'css' => [
+                [
+                    'href' => 'comments.css',
+                    'base_path' => '/resources/comments/css/'
+                ]
+            ],
             'javascript' => [
                 [
-                    'src' => 'post.js',
-                    'base_path' => '/js/'
+                    'src' => 'comments.js',
+                    'base_path' => '/resources/comments/js/'
                 ]
             ]
         ];

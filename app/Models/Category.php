@@ -10,6 +10,8 @@ class Category extends Model
 {
     use HasFactory;
 
+    protected $table = 'categories';
+
     protected $fillable = [
         'name',
         'slug',
@@ -17,6 +19,6 @@ class Category extends Model
 
     public function posts()
     {
-        return $this->hasMany(Posts::class);
+        return $this->hasMany(Posts::class, 'category_id', 'id');
     }
 }

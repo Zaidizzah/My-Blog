@@ -12,12 +12,23 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     /**
+     * Valdates the captcha.
+     */
+    public function validateCaptcha(string $captcha)
+    {
+        return empty($captcha) ? false : session('captcha.text') === $captcha;
+    }
+
+    /**
      * Returns the signin page.
      * 
      * @return \Illuminate\View\View
      */
-    public function signInPage(): \Illuminate\View\View
+    public function signInPage()
     {
+        // Set captcha on session
+        session(['captcha' => generate_captcha()]);
+
         $resources = [
             'title' => 'Sign In',
             'css' => [
@@ -38,6 +49,8 @@ class AuthController extends Controller
      */
     public function signIn(Request $request): \Illuminate\Http\RedirectResponse
     {
+        if (!$this->validateCaptcha($request->input('_captcha'))) return back()->with('message', toast('Invalid captcha', 'error'))->withInput();
+
         $credentials = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string'
@@ -56,8 +69,11 @@ class AuthController extends Controller
      * 
      * @return \Illuminate\View\View
      */
-    public function signUpPage(): \Illuminate\View\View
+    public function signUpPage()
     {
+        // Set captcha on session
+        session(['captcha' => generate_captcha()]);
+
         $resources = [
             'title' => 'Sign Up',
             'css' => [
@@ -79,6 +95,8 @@ class AuthController extends Controller
      */
     public function signUp(Request $request): \Illuminate\Http\RedirectResponse
     {
+        if (!$this->validateCaptcha($request->input('_captcha'))) return back()->with('message', toast('Invalid captcha', 'error'))->withInput();
+
         $validator = Validator::make(
             $request->all(),
             [

@@ -10,6 +10,8 @@ class Posts extends Model
 {
     use HasFactory;
 
+    protected $table = 'posts';
+
     protected $fillable = array(
         'title',
         'category_id',
@@ -23,17 +25,17 @@ class Posts extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function comments()
     {
-        return $this->hasMany(Comments::class, 'post_id');
+        return $this->hasMany(Comments::class, 'post_id', 'id');
     }
 
     /**
@@ -65,6 +67,11 @@ class Posts extends Model
             $query->whereHas('author', function ($query) use ($author) {
                 $query->where('username', str_replace('-', ' ', $author));
             });
+        })->when($filters['month'] ?? false, function ($query, $month) use ($filters) {
+            if ($filters['year'] ?? false) {
+                $query->whereYear('created_at', $filters['year'])
+                    ->whereMonth('created_at', $month);
+            }
         });
     }
 

@@ -157,6 +157,9 @@ class PostController extends Controller
     {
         $post = $this->validateUserAction('slug', $slug);
 
+        // Set captcha on session
+        session(['captcha' => generate_captcha()]);
+
         $resources = [
             'title' => $post->title,
             'subtitle' => "Post: $post->title",
@@ -166,6 +169,18 @@ class PostController extends Controller
                 'Posts Management' => '/post',
                 $post->title => '/post/' . $post->slug
             ],
+            'css' => [
+                [
+                    'href' => 'comments.css',
+                    'base_path' => '/resources/comments/css/'
+                ]
+            ],
+            'javascript' => [
+                [
+                    'src' => 'comments.js',
+                    'base_path' => '/resources/comments/js/'
+                ]
+            ]
         ];
 
         return view('dashboard.post.show')->with([

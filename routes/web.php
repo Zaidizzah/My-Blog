@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PostsController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
@@ -65,23 +65,23 @@ Route::get('/contact', function () {
  * Route to render posts/blog page with GET method
  */
 Route::get(
-    '/posts',
+    '/blog',
     [
-        PostsController::class,
+        BlogController::class,
         'index'
     ]
-)->name('posts');
+)->name('blog');
 
 /**
  * Route to render single post page with GET method
  */
 Route::get(
-    '/posts/{post:slug}',
+    '/blog/{post:slug}',
     [
-        PostsController::class,
+        BlogController::class,
         'show'
     ]
-)->name('posts.show');
+)->name('blog.show');
 
 /**
  * Route to render signin page with GET method
@@ -149,6 +149,17 @@ Route::get(
     ]
 )->middleware('auth')->name('dashboard');
 
+/**
+ * Route to render users management or detail page with GET method
+ */
+Route::get(
+    '/user/profile/{user:username}',
+    [
+        UserController::class,
+        'show'
+    ]
+)->middleware('auth')->name('user.profile');
+
 Route::group(['middleware' => ['auth', 'role:Administrator']], function () {
     /**
      * Route to render users management page with GET method
@@ -160,17 +171,6 @@ Route::group(['middleware' => ['auth', 'role:Administrator']], function () {
             'index'
         ]
     )->name('user');
-
-    /**
-     * Route to render users management or detail page with GET method
-     */
-    Route::get(
-        '/user/profile/{user:username}',
-        [
-            UserController::class,
-            'show'
-        ]
-    )->name('user.show');
 
     /**
      * Route to create new user/registered new user with POST method
@@ -320,7 +320,7 @@ Route::get(
  * Route to render comments management page with GET method
  */
 Route::get(
-    '/comment/{post:slug}',
+    '/comments/manage',
     [
         CommentsController::class,
         'index'
@@ -331,7 +331,7 @@ Route::get(
  * Route to store comment with POST method
  */
 Route::post(
-    '/comment/store/{post:slug}',
+    '/comments/store/{post:slug}',
     [
         CommentsController::class,
         'store'
@@ -339,10 +339,10 @@ Route::post(
 )->middleware('auth')->name('comment.store');
 
 /**
- * Route to replying another comment with POST method
+ * Route to replying specific comment with POST method
  */
 Route::post(
-    '/comment/reply/{comment:id}',
+    '/comments/reply/{comment:id}',
     [
         CommentsController::class,
         'reply'
@@ -350,10 +350,32 @@ Route::post(
 )->middleware('auth')->name('comment.reply');
 
 /**
+ * Route to report comment with POST method
+ */
+Route::post(
+    '/comments/report/{comment:id}',
+    [
+        CommentsController::class,
+        'report'
+    ]
+)->middleware('auth')->name('comment.report');
+
+/**
+ * Route to get more comments with GET method
+ */
+Route::get(
+    '/comments/get',
+    [
+        CommentsController::class,
+        'get'
+    ]
+)->middleware('auth')->name('comment.get');
+
+/**
  * Route to delete comment with GET method
  */
 Route::get(
-    '/comment/delete/{comment:id}',
+    '/comments/delete/{comment:id}',
     [
         CommentsController::class,
         'destroy'

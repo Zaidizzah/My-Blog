@@ -31,7 +31,7 @@
     
     @includeWhen(auth()->check(), 'partials.sidebar')
 
-    <main class="content-wrapper container">
+    <main class="content-wrapper container-xl">
 
         @includeWhen(
             route_check(['home', 'about', 'contact', 'posts']),

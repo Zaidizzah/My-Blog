@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-1 border-dark shadow-sm sticky-top">
     <div class="container-fluid">
         <a class="navbar-brand me-5" href="/">
-            <img src="/images/RPL_Skandakra_Logo_Type_modified.svg" class="logo" alt="Logo" class="d-inline-block align-text-top">
+            <img src="/images/logo/RPL_Skandakra_Logo_Type_modified.svg" class="logo" alt="Logo" class="d-inline-block align-text-top">
         </a>
         <button class="navbar-toggler" type="button" id="toggleNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -24,12 +24,12 @@
                     </a>
                     <ul class="dropdown-menu shadow-sm" aria-labelledby="navbarDropdownCategories">
                         @foreach ($categories as $category)
-                            <li><a class="dropdown-item {{ is_active_query('*category=' . $category->slug) }}" href="/posts?{{ http_build_query(array_merge(request()->except('page'), ['category' => $category->slug])) }}" title="Link: redirect to posts by category '{{ $category->name }}'" aria-current="{{ is_active_query('*category=' . $category->slug) ? 'page' : 'false' }}">#{{ $category->name }}</a></li>
+                            <li><a class="dropdown-item {{ is_active_query('*category=' . $category->slug) }}" href="/blog?{{ http_build_query(array_merge(request()->except('page'), ['category' => $category->slug])) }}" title="Link: redirect to posts by category '{{ $category->name }}'" aria-current="{{ is_active_query('*category=' . $category->slug) ? 'page' : 'false' }}">#{{ $category->name }}</a></li>
                         @endforeach
                     </ul>
                 </li> 
                 <li class="nav-item">
-                    <a class="nav-link {{ set_active('posts*') }}" href="/posts?page=1" title="Link: redirect to blog page or list of posts" aria-current="{{ set_active('posts*', 'post*') ? 'page' : 'false' }}">Blog</a>
+                    <a class="nav-link {{ set_active('blog*') }}" href="/blog?page=1" title="Link: redirect to blog page or list of posts" aria-current="{{ set_active('blog*') ? 'page' : 'false' }}">Blog</a>
                 </li>
             </ul>
             @auth

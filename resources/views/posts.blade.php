@@ -1,6 +1,7 @@
 @extends('layouts.main')
 
 @section('container')
+
     @if ($posts->isNotEmpty()) 
         <section class="--posts-wrapper">
             <section class="--first-posts-section-wrapper">
@@ -20,13 +21,13 @@
                             />
                         </div>
                         <div class="--post-metadata">
-                            <h3><a href="/posts/{{ $posts[0]->slug }}">{{ $posts[0]->title }}</a></h3>
+                            <h3><a href="/blog/{{ $posts[0]->slug }}">{{ $posts[0]->title }}</a></h3>
                             <p>
                                 By. {{ isset($posts[0]->author->name) ? $posts[0]->author->name : 'Unknown' }} in {{ $posts[0]->category->name }}
                                 <small class="text-muted">
                                     At {{ explode(' ', $posts[0]->created_at)[0] }}, {{ $posts[0]->created_at->format('H:i A') }} or {{ $posts[0]->created_at->diffForHumans() }}
                                 </small>
-                                <a href="/posts/{{ $posts[0]->slug }}#comments" class="float-end text-muted no-permalink">Comments: 0</a>
+                                <a href="/blog/{{ $posts[0]->slug }}#comments" class="float-end text-muted no-permalink">Comments: {{ $posts[0]->count() }}</a>
                             </p>
                         </div>
                         <div class="--post-excerpt">
@@ -61,13 +62,13 @@
                                 />
                             </div>
                             <div class="--post-metadata">
-                                <h3><a href="/posts/{{ $post->slug }}">{{ $post->title }}</a></h3>
+                                <h3><a href="/blog/{{ $post->slug }}">{{ $post->title }}</a></h3>
                                 <p>
                                     By. {{ isset($post->author->name) ? $post->author->name : 'Unknown' }} in {{ $post->category->name }}
                                     <small class="text-muted">
                                         At {{ explode(' ', $post->created_at)[0] }}, {{ $post->created_at->format('H:i A') }} or {{ $post->created_at->diffForHumans() }}
                                     </small>
-                                    <a href="/posts/{{ $post->slug }}#comments" class="float-end text-muted no-permalink">Comments: 0</a>
+                                    <a href="/blog/{{ $post->slug }}#comments" class="float-end text-muted no-permalink">Comments: {{ $posts[0]->count() }}</a>
                                 </p>
                             </div>
                             <div class="--post-excerpt">
@@ -90,7 +91,7 @@
             <section class="--sidebar-posts-wrapper">
                 <!-- Search Section -->
                 <section class="search-section mb-3" aria-label="search section">
-                    <form action="/posts" method="get" title="Form: Search for posts">
+                    <form action="/blog" method="get" title="Form: Search for posts">
                         <div class="input-group flex-nowrap">
                             <input type="search" class="form-control border-1 border-dark rounded-0" list="search-list" title="Input: Search for posts by title or author" placeholder="Search by title or author..." aria-label="Search" value="{{ request('search') }}">
                             <datalist id="search-list">
@@ -118,16 +119,16 @@
                         </li>
                         @foreach ($categories as $category)
                             <li class="list-group-item border-top-0 border-bottom border-1 border-dark rounded-0">
-                                <a href="/posts?category={{ $category->slug }}" title="Link: redirect to posts by category '{{ $category->name }}'">{{ $category->name }}</a>
+                                <a href="/blog?category={{ $category->slug }}" title="Link: redirect to posts by category '{{ $category->name }}'">{{ $category->name }}</a>
                             </li>
                         @endforeach
                     </ul>
                 </section>
 
                 <!-- New 7 Posts Section -->
-                <section class="new-7-posts-section border border-bottom-0 border-1 border-dark mb-3" aria-label="new 7 posts section">
+                <section class="new-posts-section border border-bottom-0 border-1 border-dark mb-3" aria-label="new 7 posts section">
                     <h2 class="h4 text-dark bg-light border-bottom border-dark p-3 mb-0">New Posts</h2>
-                    @foreach ($posts->take(7) as $post)
+                    @foreach ($new_posts as $post)
                         <article class="--post-wrapper border-0 border-bottom border-dark" title="Article: {{ $post->title }} by {{ isset($post->author->name) ? $post->author->name : 'Unknown' }} in {{ $post->category->name }}">
                             <div class="--post-image border-0">
                                 <img
@@ -143,13 +144,13 @@
                                 />
                             </div>
                             <div class="--post-content p-2">
-                                <h3 class="h5"><a href="/posts/{{ $post->slug }}" title="Link: {{ $post->title }}">{{ $post->title }}</a></h3>
+                                <h3 class="h5"><a href="/blog/{{ $post->slug }}" title="Link: {{ $post->title }}">{{ $post->title }}</a></h3>
                                 <p>
                                     By. {{ isset($post->author->name) ? $post->author->name : 'Unknown' }} in {{ $post->category->name }}
                                     <small class="text-muted">
                                         At {{ explode(' ', $post->created_at)[0] }}, {{ $post->created_at->format('H:i A') }} or {{ $post->created_at->diffForHumans() }}
                                     </small>
-                                    <a href="/posts/{{ $post->slug }}#comments" class="float-end text-muted no-permalink">Comments: 0</a>
+                                    <a href="/blog/{{ $post->slug }}#comments" class="float-end text-muted no-permalink">Comments: 0</a>
                                 </p>
                             </div>
                         </article>
@@ -159,12 +160,12 @@
                 <!-- Arsip Section -->
                 <section class="arsip-sectio mb-3" aria-label="arsip section">
                     <ul class="list-group">
-                        <li class="list-group-item bg-light border-1 border-dark rounded-0">
+                        <li class="list-group-item bg-light border-bottom border-1 border-dark rounded-0">
                             <h2 class="h4 text-dark mb-3">Archive</h2>
                         </li>
                         @foreach ($archives as $archive)
                             <li class="list-group-item border-top-0 border-bottom border-1 border-dark rounded-0">
-                                <a href="/posts?month={{ $archive->month }}&year={{ $archive->year }}" title="Link: redirect to posts in {{ generate_month_name($archive->month) }} {{ $archive->year }}">{{ generate_month_name($archive->month) }} {{ $archive->year }}</a>
+                                <a href="/blog?month={{ $archive->month }}&year={{ $archive->year }}" title="Link: redirect to posts in {{ generate_month_name($archive->month) }} {{ $archive->year }}">{{ generate_month_name($archive->month) }} {{ $archive->year }}</a>
                             </li>
                         @endforeach
                     </ul>
@@ -201,8 +202,9 @@
             </div>
         </section>
     @endif
-            
-    @if (request('search') || request('category') || request('author'))
-        <a href="/posts?page=1" class="btn btn-primary border-1 border-dark mt-2"><< Back</a>
+
+    @if (array_intersect(array_keys(request()->query()), ['search', 'category', 'author', 'month', 'year']))
+        <a href="/blog?page=1" class="btn btn-primary border-1 border-dark mt-2"><< Back</a>
     @endif
+
 @endsection

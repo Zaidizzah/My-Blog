@@ -27,6 +27,17 @@
             minlength="8" maxlength="16" placeholder="Password"
             aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}"
             required>
+
+            <div class="input-group mt-2">
+                <img src="{{ session('captcha.image') }}" 
+                    class="img-thumbnail border-dark" 
+                    title="Captcha Image" 
+                    data-img-preview
+                    data-img-preview-title="Captcha Image"
+                    loading="lazy" 
+                    alt="Captcha Image">
+                <input type="text" class="form-control border-dark" name="_captcha" maxlength="4" placeholder="Captcha" required>
+            </div>
             
             <button class="btn btn-primary w-100 py-2" type="submit" title="Button: Click to sign up">Sign up</button>
         </form> 

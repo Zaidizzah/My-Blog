@@ -8,17 +8,20 @@
     <div class="sidebar-body">
         <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-                <a class="nav-link {{ set_active('dashboard') }}" href="/dashboard" title="Link: redirect to dashboard page" aria-current="{{ set_active('dashboard') ? 'page' : 'false' }}"><i class="fa fa-home fa-fw me-2"></i> Dashboard</a>
+                <a class="nav-link {{ set_active('dashboard*') }}" href="/dashboard" title="Link: redirect to dashboard page" aria-current="{{ set_active('dashboard*') ? 'page' : 'false' }}"><i class="fa fa-home fa-fw me-2"></i> Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ set_active('post') }}" href="/post" title="Link: redirect to post page" aria-current="{{ set_active('post') ? 'page' : 'false' }}"><i class="fa fa-newspaper fa-fw me-2"></i> Manage Posts</a>
+                <a class="nav-link {{ set_active('post*') }}" href="/post" title="Link: redirect to post page" aria-current="{{ set_active('post*') ? 'page' : 'false' }}"><i class="fa fa-newspaper fa-fw me-2"></i> Manage Posts</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ set_active('comment*') }}" href="/comments/manage" title="Link: redirect to comments page" aria-current="{{ set_active('comment*') ? 'page' : 'false' }}"><i class="fa fa-comments fa-fw me-2"></i> Manage Comments</a>
             </li>
             @can('access-admin')
                 <li class="nav-item">
-                    <a class="nav-link {{ set_active('category') }}" href="/category" title="Link: redirect to category page" aria-current="{{ set_active('categories') ? 'page' : 'false' }}"><i class="fa fa-list fa-fw me-2"></i> Manage Categories</a>
+                    <a class="nav-link {{ set_active('category*') }}" href="/category" title="Link: redirect to category page" aria-current="{{ set_active('category*') ? 'page' : 'false' }}"><i class="fa fa-list fa-fw me-2"></i> Manage Categories</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ set_active('user') }}" href="/user" title="Link: redirect to user page" aria-current="{{ set_active('users') ? 'page' : 'false' }}"><i class="fa fa-users fa-fw me-2"></i> Manage Users</a>
+                    <a class="nav-link {{ set_active('user*') }}" href="/user" title="Link: redirect to user page" aria-current="{{ set_active('users*') ? 'page' : 'false' }}"><i class="fa fa-users fa-fw me-2"></i> Manage Users</a>
                 </li>
             @endcan
         </ul>

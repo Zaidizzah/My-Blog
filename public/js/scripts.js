@@ -72,9 +72,11 @@ async function fetchApi(url, method = "GET", options = {}) {
 
     const imagePreview = new ImagePreview();
 
-    let CSRF_TOKEN = document
+    const CSRF_TOKEN = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
+
+    window.CSRF_TOKEN = CSRF_TOKEN;
 
     document.querySelector("#toggleNavbar").addEventListener("click", () => {
         document.querySelector(".offcanvas-collapse").classList.toggle("open");

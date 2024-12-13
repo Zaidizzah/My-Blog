@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comments', function (Blueprint $table) {
+        Schema::create('comment_reports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('post_id');
+            $table->foreignId('comment_id');
             $table->foreignId('user_id');
-            $table->integer('parent_id')->nullable();
-            $table->text('description');
-            $table->boolean('is_reported')->default(false);
+            $table->text('description')->nullable();
+            $table->enum('type', ['spam', 'abuse', 'offensive', 'false_information', 'other'])->default('other');
+            $table->enum('status', ['pending', 'resolved'])->default('pending');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('comments');
+        Schema::dropIfExists('comment_reports');
     }
 };

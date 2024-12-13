@@ -61,6 +61,38 @@ if (!function_exists('is_active_query')) {
     }
 }
 
+if (!function_exists('generate_captcha')) {
+
+    /**
+     * Generate captcha
+     * 
+     * @return array
+     */
+    function generate_captcha(): array
+    {
+        $key = 'captcha_' . uniqid();
+        $image = imagecreatetruecolor(100, 30);
+        $backgroundColor = imagecolorallocate($image, 255, 255, 255);
+        $textColor = imagecolorallocate($image, 0, 0, 0);
+        $fontPath = public_path() . '/fonts/DeJavuSans.ttf';
+        $text = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 4);
+
+        imagefilledrectangle($image, 0, 0, 100, 30, $backgroundColor);
+        imagettftext($image, 20, 0, 10, 25, $textColor, $fontPath, $text);
+
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_clean();
+        imagedestroy($image);
+
+        return [
+            'key' => $key,
+            'text' => $text,
+            'image' => 'data:image/png;base64,' . base64_encode($imageData),
+        ];
+    }
+}
+
 if (!function_exists('breadcrumb_builder')) {
 
     /**
@@ -276,24 +308,84 @@ if (!function_exists('generate_tags')) {
     }
 }
 
-if (!function_exists('generate_comments_section') && !function_exists('render_root_comment')) {
+if (
+    !function_exists('generate_comments_section') &&
+    !function_exists('generate_grouped_comments_section') &&
+    !function_exists('generate_direct_comments_section') &&
+    !function_exists('render_comment_with_replies')
+) {
 
     /**
      * Generate comments section.
      *
-     * @param \Illuminate\Support\Collection $comments
+     * @param \Illuminate\Support\Collection|array $comments Comment data: can be a direct collection or grouped data.
      * @return string
      */
-    function generate_comments_section(object $comments)
+    function generate_comments_section($comments)
     {
-        if ($comments->isEmpty()) {
+        if (!$comments || $comments->isEmpty()) {
             return '<div class="no-comments text-center py-4">No comments yet.</div>';
         }
 
+        // Detect whether the comment data has been grouped by key
+        if ($comments->first() instanceof \Illuminate\Support\Collection) {
+            return generate_grouped_comments_section($comments);
+        }
+
+        // If the data is direct collection
+        return generate_direct_comments_section($comments);
+    }
+
+    /**
+     * Generate section for grouped comments (grouped by title).
+     *
+     * @param \Illuminate\Support\Collection $groupedComments Collection which are grouped by key (post title).
+     * @return string
+     */
+    function generate_grouped_comments_section(\Illuminate\Support\Collection $groupedComments)
+    {
+        $id = substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 4) . date('YmdHis');
+        $accordionHtml = "<div class=\"accordion\" id=\"commentsAccordion-$id\">";
+
+        foreach ($groupedComments as $postTitle => $postComments) {
+            $accordionId = md5($id); // Unique ID for accordion
+            $accordionHtml .= <<<HTML
+            <div class="accordion-item border-dark">
+                <h2 class="accordion-header" id="heading{$accordionId}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$accordionId}" aria-expanded="false" aria-controls="collapse{$accordionId}">
+                        <strong class="me-2">Post:</strong> {$postTitle} - comments: {$postComments->count()}
+                    </button>
+                </h2>
+                <div id="collapse{$accordionId}" class="accordion-collapse collapse" aria-labelledby="heading{$accordionId}" data-bs-parent="#commentsAccordion">
+                    <div class="accordion-body">
+        HTML;
+
+            // Group comments by parent_id for hierarchical rendering
+            $commentGroups = $postComments->groupBy('parent_id');
+            $rootComments = $commentGroups->get(null, collect());
+            foreach ($rootComments as $comment) {
+                $accordionHtml .= render_comment_with_replies($comment, $commentGroups);
+            }
+
+            $accordionHtml .= "</div></div></div>"; // Close accordion body and item
+        }
+
+        $accordionHtml .= "</div>"; // Close accordion wrapper
+        return $accordionHtml;
+    }
+
+    /**
+     * Generate section for direct comments.
+     *
+     * @param \Illuminate\Support\Collection $comments Collection of all comments.
+     * @return string
+     */
+    function generate_direct_comments_section(\Illuminate\Support\Collection $comments)
+    {
         // Group comments by parent_id
         $commentGroups = $comments->groupBy('parent_id');
 
-        // Generate HTML untuk root comments
+        // Generate HTML for root comments
         $rootComments = $commentGroups->get(null, collect());
         $commentsHtml = '';
         foreach ($rootComments as $comment) {
@@ -308,47 +400,76 @@ if (!function_exists('generate_comments_section') && !function_exists('render_ro
      *
      * @param object $comment
      * @param \Illuminate\Support\Collection $commentGroups
+     * @param object|null $parentComment
      * @return string
      */
     function render_comment_with_replies($comment, $commentGroups, $parentComment = null)
     {
-        $authorName = $comment->author->name;
+        $authorName = $comment->author->name ?? 'Anonymous';
         $postId = $comment->post_id ?? null;
         $avatarUrl = $comment->author->image ?? "https://dummyimage.com/680x480/3e3e3e/fff&text={$authorName}";
         $timeAgo = $comment->created_at->diffForHumans();
+        $description = $comment->description ?? $comment->comments->description;
 
-        // Optimized "Reply to"
+        // If replying to a parent comment
         $replyingTo = $parentComment
-            ? "<span class=\"replyng-to text-primary\">@{$parentComment->author->name}</span>"
+            ? "<span class=\"replyng-to text-primary\"><i class=\"fa fa-reply fa-fw\" style=\"font-size: 0.8em; transform: rotateY(180deg);\"></i> {$parentComment->author->name}</span>"
             : '';
 
-        // Render komentar utama
-        $html = <<<HTML
-            <div class="comments-wrapper">
-                <div class="comment" data-post-id="{$postId}" data-comment-id="{$comment->id}" data-comment-writter="{$comment->author->name}" title="Comment by {$authorName}">
-                    <img class="comment-avatar img-thumbnail" 
-                        src="{$avatarUrl}" 
-                        title="User Avatar: {$authorName}" 
-                        data-img-preview
-                        data-img-preview-title="User Avatar: {$authorName}"
-                        loading="lazy" 
-                        onerror="this.onerror=null;this.src='/images/no-image-available.jpg';"
-                        alt="User Avatar">
-                    <div class="comment-content">
-                        <div class="comment-header">
-                            <span class="comment-author">{$authorName} {$replyingTo} . 
-                                <a href="javascript:void(0);" 
-                                class="comment-reply small no-permalink" 
-                                title="Reply to this comment">Reply</a>
-                            </span>
-                            <span class="comment-date">{$timeAgo}</span>
-                        </div>
-                        <p class="comment-text">{$comment->description}</p>
-                    </div>
-                </div>
-            HTML;
+        $commentAuthor = auth()->check() && auth()->user()->name === $authorName ?
+            "<span class=\"text-success\">$authorName <small class=\"small\">(You)</small></span>" :
+            $authorName;
 
-        // Cek jika ada nested comments
+        $replyLinks = !set_active('comment*') && auth()->check() ? "
+            . <a href=\"javascript:void(0);\" 
+                    class=\"comment-reply small no-permalink\" 
+                    title=\"Reply to this comment\">Reply</a>
+        " : '';
+
+        $reportLink =
+            ($comment->is_reported ?? $comment->comments->is_reported) ? ". <span class=\"small text-danger\"><i class=\"fa fa-ban fa-fw\"></i> This comment has been reported.</span>" : (
+                !set_active('comment*') && auth()->check() ? "
+            . <a href=\"javascript:void(0);\" 
+                    class=\"comment-report small no-permalink\" 
+                    title=\"Report this comment\">Report</a>
+        " : '');
+
+        $reportBorder = $comment->is_reported ?? $comment->comments->is_reported ? ' border-danger' : '';
+        $reportLabel = $comment->is_reported ?? $comment->comments->is_reported ? 'true' : 'false';
+        $reportType = $comment->comments->type ?? 'report';
+
+        // Render main comment
+        $html = <<<HTML
+        <div class="comment-wrapper">
+            <div class="comment{$reportBorder}" data-post-id="{$postId}" data-comment-id="{$comment->id}" data-label-reported="{$reportLabel}" data-comment-writter="{$authorName}" title="Comment by {$authorName}">
+                <!-- <div class="comment-popup">
+                    <p class="text-danger"><strong>Description report:</strong> ($reportType) This comment has been reported.</p>
+                    <div class="btn-group" role="group" aria-label="Comment actions">
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                            title="Button: Click to report this comment"><i class="fa fa-ban fa-fw"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Button: Click to reply to this comment"><i class="fa fa-reply fa-fw"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" title="Button: Click to share this comment"><i class="fa fa-share fa-fw"></i></button>
+                    </div>
+                </div> -->
+                <img class="comment-avatar img-thumbnail" 
+                    src="{$avatarUrl}" 
+                    title="User Avatar: {$authorName}" 
+                    data-img-preview
+                    data-img-preview-title="User Avatar: {$authorName}"
+                    loading="lazy" 
+                    onerror="this.onerror=null;this.src='/images/no-image-available.jpg';"
+                    alt="User Avatar">
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <span class="comment-author">{$commentAuthor} {$replyingTo} {$replyLinks} {$reportLink}</span>
+                        <span class="comment-date">{$timeAgo}</span>
+                    </div>
+                    <p class="comment-text">{$description}</p>
+                </div>
+            </div>
+    HTML;
+
+        // Render nested comments (replies)
         $nestedComments = $commentGroups->get($comment->id, collect());
         if ($nestedComments->isNotEmpty()) {
             $html .= '<div class="nested-comments">';
@@ -358,7 +479,8 @@ if (!function_exists('generate_comments_section') && !function_exists('render_ro
             $html .= '</div>';
         }
 
-        $html .= '</div>'; // Tutup wrapper utama
+        $html .= '</div>'; // Close main wrapper
+
         return $html;
     }
 }

@@ -41,7 +41,7 @@ class BlogController extends Controller
             'subtitle' => empty($titleParts) ? 'All Posts' : 'Posts - ' . implode(' ', $titleParts),
             'breadcrumb' => [
                 'Home' => '/',
-                'Posts' => '/posts',
+                'Blog' => '/blog',
             ],
         ];
 
@@ -75,8 +75,8 @@ class BlogController extends Controller
             'subtitle' => "Post: $post->title",
             'breadcrumb' => [
                 'Home' => '/',
-                'Posts' => '/posts',
-                $post->title => '/posts/' . $post->slug,
+                'Blog' => '/blog',
+                $post->title => '/blog/' . $post->slug,
             ],
             'css' => [
                 [
